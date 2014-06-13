@@ -12,8 +12,14 @@ import optparse
 import os
 import time
 import glob
+import logging
 
 log_path = '/home/backup/vm_backup.log'
+
+logging.basicConfig(level=logging.DEBUG,
+                    format='%(asctime)s %(message)s',
+                    filename=log_path,
+                    filemode='w')
 
 remote = {'dbtool': 'dbtool'}
 
@@ -72,7 +78,7 @@ class VM(object):
         # remove old snapshot again
         cmd = "xe vm-uninstall uuid=%s force=true" % snapshot_uuid
         check_output(cmd, shell=True)
-        print('Exported VM "%s" in %s seconds.' % (self.name, time.time() - start))
+        logging.info('Exported VM "%s" in %s seconds.' % (self.name, time.time() - start))
 
 def check_output(command, shell=False):
     p = subprocess.Popen(command, stdout=subprocess.PIPE, shell=shell)
@@ -160,17 +166,21 @@ def get_backup_vms():
 
 def export_all_vms(device, directory, delete_old):
     #1. First let's check if the device is mounted.
+    logging.info('===Starting backup routine===')
     if not os.path.exists(directory):
         os.makedirs(directory)
+        logging.info('Done, folder %s created.' % directory)
 
     try:
         check_output(['mountpoint', '-q', directory])
     except CalledProcessError:
         check_output(['mount', device, directory])
+        logging.info('Done, mounting %s to %s' % (device, directory))
 
     #2.1 Auditlog from XenServer
     try:
         audit(remote['dbtool'], directory)
+        logging.info('Done, auditlog backup from xenserver')
     except CalledProcessError:
         timestamp = time.strftime("%Y-%m-%d_%H-%M-%S", time.gmtime())
         send_mail('[FAILURE] Backup AuditLog - %s' % timestamp , 'Problems running backup Auditlog at %s' % timestamp)
@@ -178,19 +188,32 @@ def export_all_vms(device, directory, delete_old):
     #2.2 Pool metadata backup
     try:
         metadata_backup(directory, remote['host'])
+        logging.info('Done, pool metadata backup')
     except CalledProcessError:
         timestamp = time.strftime("%Y-%m-%d_%H-%M-%S", time.gmtime())
         send_mail('[FAILURE] Backup MetaData Pool - %s' % timestamp , 'Problems running backup MetaDataBackup at %s' % timestamp)
 
     #3.Checking all Running Vm's and doing our job: backup!
     vms = get_backup_vms()
+    failures = []
     for vm in vms:
-        vm.export(directory)
+        try:
+            vm.export(directory)
+        except CalledProcessError:
+            timestamp = time.strftime("%Y-%m-%d_%H-%M-%S", time.gmtime())
+            failures.append((vm.name, timestamp))
+    if failures:
+        content = "VM   Time Failure\n"
+        for failure in failures:
+            content += '%s  %s\n' % (failure[0], failure[1])
+        timestamp = time.strftime("%Y-%m-%d_%H-%M-%S", time.gmtime())
+        send_mail('[FAILURE] Problems on Exporting Vms - %s' % timestamp, content)
 
     #4. Let's take a look at the history and do the cleanup.
     if delete_old:
         try:
             cleanup(device, directory, vms)
+            logging.info('Done, cleanup.')
         except CalledProcessError:
             timestamp = time.strftime("%Y-%m-%d_%H-%M-%S", time.gmtime())
             send_mail('[FAILURE] Delete Old Problems - %s' % timestamp , 'Problems running backup Delete old files at %s' % timestamp)
