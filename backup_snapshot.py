@@ -53,17 +53,14 @@ class VM(object):
     def __str__(self):
         return '%s - %s (%s)' % (self.uuid, self.name, self.status)
 
-    def export(self, directory_name=None):
+    def export(self):
         start = time.time()
         timestamp = time.strftime("%Y-%m-%d_%H-%M-%S", time.gmtime())
 
-        file_name = '%s %s.xva' % (timestamp, self.name)
-        if directory_name is not None:
-            file_name = os.path.join(directory_name, file_name)
-
+        file_name = '%s %s' % (timestamp, self.name)
         # create a snapshot
         snapshot_uuid = check_output(['xe', 'vm-snapshot', 'uuid=' + self.uuid,
-                                      'new-name-label=backup-' + self.name]).strip()
+                                      'new-name-label=backup-' + file_name]).strip()
 
         logging.info('Exported Snapshot from VM "%s" in %s seconds.' % (self.name, time.time() - start))
 
@@ -78,7 +75,7 @@ def check_output(command, shell=False):
 def parse_timestamp(timestamp):
     pass
 
-def cleanup(directory, snapshots, copies=3):
+def cleanup(snapshots, copies=3):
     '''
     Cleans it up so
     that we only have the last copies value backups on it.
@@ -145,9 +142,6 @@ def get_backup_vms():
 def export_all_vms(directory, delete_old):
     #1. First let's check if the device is mounted.
     logging.info('===Starting snapshots backup routine===')
-    if not os.path.exists(directory):
-        os.makedirs(directory)
-        logging.info('Done, folder %s created.' % directory)
 
     #2.Checking all Running Vm's and doing our job: backup!
     vms = get_backup_vms()
@@ -155,7 +149,7 @@ def export_all_vms(directory, delete_old):
     snapshots = []
     for vm in vms:
         try:
-            snapshot = vm.export(directory)
+            snapshot = vm.export()
             snapshots.append(snapshot)
         except CalledProcessError:
             timestamp = time.strftime("%Y-%m-%d_%H-%M-%S", time.gmtime())
@@ -170,7 +164,7 @@ def export_all_vms(directory, delete_old):
     #4. Let's take a look at the history and do the cleanup.
     if delete_old:
         try:
-            cleanup(directory, snapshots)
+            cleanup(snapshots)
             logging.info('Done, cleanup.')
         except CalledProcessError:
             timestamp = time.strftime("%Y-%m-%d_%H-%M-%S", time.gmtime())
@@ -181,11 +175,7 @@ def export_all_vms(directory, delete_old):
 if __name__ == '__main__':
     parser = optparse.OptionParser()
     parser.add_option('-d', '--delete-old', action="store_true", default=False)
-    parser.add_option('-i', '--dir', action="store", dest="directory")
 
     options, remainder = parser.parse_args()
-    if options.directory:
-        export_all_vms(options.directory, options.delete_old)
-    else:
-        print('No device and no directory found')
+    export_all_vms(options.directory, options.delete_old)
 
