@@ -17,6 +17,12 @@ log_path = '/home/backup/vm_backup.log'
 
 remote = {'dbtool': 'dbtool'}
 
+def send_mail(subject, content):
+    check_output(['cat', '/root/mailheader.txt', '>', '/root/message.tmp'], shell=True)
+    check_output(['echo', 'Subject: ' + subject, '>>', '/root/message.tmp'], shell=True)
+    check_output(['echo', content, '>>', '/root/message.tmp'], shell=True)
+    check_output(['ssmtp', 'marcel@genomika.com.br', '<', '/root/message.tmp'], shell=True)
+    check_output(['rm', '-f', '/root/message.tmp'], shell=True)
 
 class CalledProcessError(Exception):
     """This exception is raised when a process run by check_call() or
@@ -122,6 +128,22 @@ def cleanup(device, directory, vms, copies=3):
 
     return remove_vms
 
+def metadata_backup(directory, host):
+    '''
+    Backs up the metadata of the Xen Pool in a restorable format.
+    Backs up the host machines over to the backup drive as well.
+    '''
+    timestamp = time.strftime("%Y-%m-%d_%H-%M-%S", time.gmtime())
+    backup_name = 'xenshuttle-metadata-%s.bak'  %  timestamp
+    output = os.path.join(directory, backup_name)
+    check_output(['xe pool-dump-database', 'file-name=', output], shell=True)
+
+
+    timestamp = time.strftime("%Y-%m-%d_%H-%M-%S", time.gmtime())
+    backup_name = 'xenshuttle-host-backup-%s.bak'  %  timestamp
+    output = os.path.join(directory, backup_name)
+    check_output(['xe host-backup', 'file-name=', output, 'host=', host], shell=True)
+
 def get_backup_vms():
     cmd = "xe vm-list is-control-domain=false is-a-snapshot=false"
     output = check_output(cmd, shell=True)
@@ -135,6 +157,7 @@ def get_backup_vms():
             result.append(VM(uuid, name, status))
     return result
 
+
 def export_all_vms(device, directory, delete_old):
     #1. First let's check if the device is mounted.
     if not os.path.exists(directory):
@@ -145,22 +168,34 @@ def export_all_vms(device, directory, delete_old):
     except CalledProcessError:
         check_output(['mount', device, directory])
 
-    #2.Let's get the metadata information
+    #2.1 Auditlog from XenServer
+    try:
+        audit(remote['dbtool'], directory)
+    except CalledProcessError:
+        timestamp = time.strftime("%Y-%m-%d_%H-%M-%S", time.gmtime())
+        send_mail('[FAILURE] Backup AuditLog - %s' % timestamp , 'Problems running backup Auditlog at %s' % timestamp)
 
-    #3.1 Auditlog from XenServer
-    audit(remote['dbtool'], directory)
+    #2.2 Pool metadata backup
+    try:
+        metadata_backup(directory, remote['host'])
+    except CalledProcessError:
+        timestamp = time.strftime("%Y-%m-%d_%H-%M-%S", time.gmtime())
+        send_mail('[FAILURE] Backup MetaData Pool - %s' % timestamp , 'Problems running backup MetaDataBackup at %s' % timestamp)
 
-    #4.2 Pool metadata backup
+    #3.Checking all Running Vm's and doing our job: backup!
+    vms = get_backup_vms()
+    for vm in vms:
+        vm.export(directory)
 
-    #5.Checking all Running Vm's and doing our job: backup!
-
-    #6. Let's take a look at the history and do the cleanup.
+    #4. Let's take a look at the history and do the cleanup.
     if delete_old:
-        cleanup(device, directory, vms)
+        try:
+            cleanup(device, directory, vms)
+        except CalledProcessError:
+            timestamp = time.strftime("%Y-%m-%d_%H-%M-%S", time.gmtime())
+            send_mail('[FAILURE] Delete Old Problems - %s' % timestamp , 'Problems running backup Delete old files at %s' % timestamp)
 
-    #7. If everything goes well, ok, otherwise send email with alert!
-
-    #8. Store all the info into the database, why ?  For future web monitor.
+    #6. Store all the info into the database, why ?  For future web monitor.
 
 if __name__ == '__main__':
     parser = optparse.OptionParser()
