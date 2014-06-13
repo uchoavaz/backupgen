@@ -11,8 +11,11 @@ import subprocess
 import optparse
 import os
 import time
+import glob
 
 log_path = '/home/backup/vm_backup.log'
+
+remote = {'dbtool': 'dbtool'}
 
 
 class CalledProcessError(Exception):
@@ -73,8 +76,51 @@ def check_output(command, shell=False):
         raise CalledProcessError(retcode, command, output=output)
     return output
 
-def audit(dbtool):
+def audit(dbtool, directory):
+    '''
+    A plaintext dump of all the info needed to figure out what used to be connected
+    to what and where it used to live, all the SR, VM, VIF, UUID's etc.
+    are here in a reasonably readable format if needed.
+    '''
+    output_file  =  os.path.join(directory, 'auditlog-xenshuttle.txt')
+    check_output([dbtool, '-a', '/var/xapi/state.db', '>', output_file])
+
+def parse_timestamp(timestamp):
     pass
+
+def cleanup(device, directory, vms, copies=3):
+    '''
+    unmounts and remounts the backup disk, and then cleans it up so
+    that we only have the last copies value backups on it.
+    '''
+
+    #unmount and the mount again procedure.
+    check_output(['umount', directory])
+
+    check_output(['mount', device, directory])
+
+    #for each directory you must find only the backups for a specific VM.
+    machines = {}
+    for vm in vms:
+        for xva in glob.glob(directory + '/*.xva'):
+            if vm.name in xva:
+                machines.setdefault(vm.name, [])
+                machines[vm.name].append(xva, parse_timestamp(xva))
+
+    #sort the machines from the latest to the oldest.
+    remove_vms = []
+
+    for vm in machines:
+        machines[vm] =  sorted(machines[vm], key = lambda t: -t)
+        #remove only the oldest 3 and only if we have more than n copies.
+        if len(machines[vm]) > copies:
+            remove_vms.extend(machines[vm][copies:])
+
+    #remove now the oldest vms
+    for vm in remove_vms:
+        os.remove(os.path.join(directory, vm))
+
+    return remove_vms
 
 def get_backup_vms():
     cmd = "xe vm-list is-control-domain=false is-a-snapshot=false"
@@ -99,18 +145,22 @@ def export_all_vms(device, directory, delete_old):
     except CalledProcessError:
         check_output(['mount', device, directory])
 
-    #2. Let's take a look at the history and do the cleanup.
-
-    #3.Let's get the metadata information
+    #2.Let's get the metadata information
 
     #3.1 Auditlog from XenServer
+    audit(remote['dbtool'], directory)
 
-    #3.2 Pool metadata backup
+    #4.2 Pool metadata backup
 
-    #4.Checking all Running Vm's and doing our job: backup!
+    #5.Checking all Running Vm's and doing our job: backup!
 
-    #5. If everything goes well, ok, otherwise send email with alert!
-    pass
+    #6. Let's take a look at the history and do the cleanup.
+    if delete_old:
+        cleanup(device, directory, vms)
+
+    #7. If everything goes well, ok, otherwise send email with alert!
+
+    #8. Store all the info into the database, why ?  For future web monitor.
 
 if __name__ == '__main__':
     parser = optparse.OptionParser()
