@@ -7,6 +7,7 @@ Our script for full backup of current vms to any storage using mount syntax.
 author: marcel@genomika.com.br;  Marcel Caraciolo
 '''
 
+import re
 import subprocess
 import optparse
 import os
@@ -23,11 +24,11 @@ logging.basicConfig(level=logging.DEBUG,
 remote = {'dbtool': 'dbtool'}
 
 def send_mail(subject, content):
-    check_output(['cat', '/root/mailheader.txt', '>', '/root/message.tmp'], shell=True)
-    check_output(['echo', 'Subject: ' + subject, '>>', '/root/message.tmp'], shell=True)
-    check_output(['echo', content, '>>', '/root/message.tmp'], shell=True)
-    check_output(['ssmtp', 'marcel@genomika.com.br', '<', '/root/message.tmp'], shell=True)
-    check_output(['rm', '-f', '/root/message.tmp'], shell=True)
+    os.system('cat /home/mailheader.txt >  /home/message.tmp')
+    os.system('echo ' + 'Subject: ' + subject + ' >> ' + '/home/message.tmp')
+    os.system('echo ' + '"%s"' %  content + ' >> ' + '/home/message.tmp')
+    os.system('ssmtp marcel@genomika.com.br < /home/message.tmp')
+    os.system('rm -f /home/message.tmp')
 
 class CalledProcessError(Exception):
     """This exception is raised when a process run by check_call() or
@@ -53,12 +54,18 @@ class VM(object):
     def __str__(self):
         return '%s - %s (%s)' % (self.uuid, self.name, self.status)
 
+    def __repr__(self):
+        return '%s - %s (%s)' % (self.uuid, self.name, self.status)
+
     def export(self):
         start = time.time()
         timestamp = time.strftime("%Y-%m-%d_%H-%M-%S", time.gmtime())
 
-        file_name = '%s %s' % (timestamp, self.name)
-        # create a snapshot
+        file_name = '%s--%s' % (timestamp, self.name)
+
+	cm =  ' '.join(['xe', 'vm-snapshot', 'uuid=' + self.uuid, 'new-name-label=backup-' + file_name])
+        logging.info(cm)
+	# create a snapshot
         snapshot_uuid = check_output(['xe', 'vm-snapshot', 'uuid=' + self.uuid,
                                       'new-name-label=backup-' + file_name]).strip()
 
@@ -73,8 +80,11 @@ def check_output(command, shell=False):
     return output
 
 def parse_timestamp(timestamp):
-    pass
-
+    pattern  =  re.search(r'backup-([0-9-_]+)--', timestamp[1])
+    if pattern:
+	return time.strptime(pattern.group(1), '%Y-%m-%d_%H-%M-%S')
+    else:
+	return None
 def cleanup(snapshots, copies=3):
     '''
     Cleans it up so
@@ -86,7 +96,6 @@ def cleanup(snapshots, copies=3):
     #remove now the oldest vms
     current_snapshots = get_snapshots()
 
-
     #for each directory you must find only the snapshots for a specific VM.
     machines = {}
     backup_vms = get_backup_vms()
@@ -94,23 +103,27 @@ def cleanup(snapshots, copies=3):
         for vm in backup_vms:
             if vm.name in snap[1]:
                 machines.setdefault(vm.name, [])
-                machines[vm.name].append(snap, parse_timestamp(snap))
+                valid_snapshot = parse_timestamp(snap)
+		if valid_snapshot:
+                   machines[vm.name].append((snap, valid_snapshot ))
 
+    #print machines
     #sort the machines from the latest to the oldest.
     remove_vms = []
 
     for vm in machines:
-        machines[vm] =  sorted(machines[vm], key = lambda t: -t)
+        machines[vm] =  sorted(machines[vm], key = lambda t: t[1])[::-1]
+        #print [ snp[1]  for snp in machines[vm]]
         #remove only the oldest 3 and only if we have more than n copies.
         if len(machines[vm]) > copies:
             remove_vms.extend(machines[vm][copies:])
 
-    #remove now the oldest vms
-    for snap, time in remove_vms:
-        cmd = "xe vm-uninstall uuid=%s force=true" % snap[0]
+    #remove now the oldest snapshots
+    for (uuid,snap) , time in remove_vms:
+        cmd = "xe snapshot-uninstall uuid=%s force=true" % uuid
+        logging.info(cmd)
         check_output(cmd, shell=True)
     return remove_vms
-
 
 def get_snapshots():
     cmd = 'xe snapshot-list'
@@ -139,12 +152,14 @@ def get_backup_vms():
     return result
 
 
-def export_all_vms(directory, delete_old):
+def export_all_vms(delete_old):
     #1. First let's check if the device is mounted.
     logging.info('===Starting snapshots backup routine===')
 
     #2.Checking all Running Vm's and doing our job: backup!
     vms = get_backup_vms()
+
+
     failures = []
     snapshots = []
     for vm in vms:
@@ -154,6 +169,7 @@ def export_all_vms(directory, delete_old):
         except CalledProcessError:
             timestamp = time.strftime("%Y-%m-%d_%H-%M-%S", time.gmtime())
             failures.append((vm.name, timestamp))
+
     if failures:
         content = "VM   Time Failure\n"
         for failure in failures:
@@ -177,5 +193,4 @@ if __name__ == '__main__':
     parser.add_option('-d', '--delete-old', action="store_true", default=False)
 
     options, remainder = parser.parse_args()
-    export_all_vms(options.directory, options.delete_old)
-
+    export_all_vms(options.delete_old)
