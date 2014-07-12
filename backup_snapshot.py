@@ -14,7 +14,7 @@ import os
 import time
 import logging
 
-log_path = '/home/backup/vm_backup.log'
+log_path = '/home/backup/snapshot_backup.log'
 
 logging.basicConfig(level=logging.DEBUG,
                     format='%(asctime)s %(message)s',
