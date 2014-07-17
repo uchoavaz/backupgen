@@ -59,7 +59,7 @@ class VM(object):
         start = time.time()
         timestamp = time.strftime("%Y-%m-%d_%H-%M-%S", time.gmtime())
 
-        file_name = '%s--%s.xva' % (timestamp, self.name)
+        file_name = 'backup-%s--%s.xva' % (timestamp, self.name)
         if directory_name is not None:
             file_name = os.path.join(directory_name, file_name)
 
@@ -75,9 +75,9 @@ class VM(object):
         logging.info(cmd + '...OK')
 
         # export snapshot
-        cmd = 'xe vm-export vm=%s filename="backup-%s" compress=true' % (snapshot_uuid, file_name)
+        cmd = 'xe vm-export vm=%s filename="%s" compress=true' % (snapshot_uuid, file_name)
         check_output(['xe', 'vm-export', 'vm=' + snapshot_uuid,
-                         'filename=backup-' + file_name, 'compress=true'])
+                         'filename=' + file_name, 'compress=true'])
 	logging.info(cmd + '...OK')
 
         # remove old snapshot again
@@ -260,6 +260,7 @@ def export_all_vms(device, directory, delete_old):
 	send_mail('[BACKUP VM] Backup routine failure - %s' % timestamp , content)
 
     #6. Store all the info into the database, why ?  For future web monitor.
+    logging.info('===Finished backup routine===')
 
 if __name__ == '__main__':
     parser = optparse.OptionParser()
