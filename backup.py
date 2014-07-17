@@ -77,7 +77,7 @@ class VM(object):
         # export snapshot
         cmd = 'xe vm-export vm=%s filename="backup-%s" compress=true' % (snapshot_uuid, file_name)
         check_output(['xe', 'vm-export', 'vm=' + snapshot_uuid,
-                         'filename=' + file_name, 'compress=true'])
+                         'filename=backup-' + file_name, 'compress=true'])
 	logging.info(cmd + '...OK')
 
         # remove old snapshot again
