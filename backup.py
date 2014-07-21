@@ -187,7 +187,7 @@ def get_backup_vms():
     return result
 
 
-def export_all_vms(device, directory, delete_old):
+def export_all_vms(device, directory, delete_old, only_running):
     #1. First let's check if the device is mounted.
     logging.info('===Starting backup routine===')
     if not os.path.exists(directory):
@@ -227,6 +227,10 @@ def export_all_vms(device, directory, delete_old):
 
     #3.Checking all Running Vm's and doing our job: backup!
     vms = get_backup_vms()
+    if only_running:
+        vms =  [ vm for vm in vms if vm.status == 'running']
+        logging.info('Selected only running vms')
+
     failures = []
     for vm in vms:
         try:
@@ -265,12 +269,13 @@ def export_all_vms(device, directory, delete_old):
 if __name__ == '__main__':
     parser = optparse.OptionParser()
     parser.add_option('-d', '--delete-old', action="store_true", default=False)
+    parser.add_option('-r', '--running', action='store_true', default=False)
     parser.add_option('-i', '--dir', action="store", dest="directory")
     parser.add_option('-o', '--device', action="store", dest="device")
 
     options, remainder = parser.parse_args()
     if options.directory and options.device:
-        export_all_vms(options.device, options.directory, options.delete_old)
+        export_all_vms(options.device, options.directory, options.delete_old, options.running)
     else:
         print('No device and no directory found')
 
