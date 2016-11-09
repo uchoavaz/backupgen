@@ -1,0 +1,50 @@
+{% extends 'menu.html' %}
+{% load static %}
+{% load lookup_bkp %}
+
+{% block content %}
+
+
+<div class='container'>
+<center><h2>{{backup_name}}</h2></center>
+<br>
+    <div class="panel-body">
+
+        <div class="dataTable_wrapper">
+            <table class="table table-striped table-bordered table-hover" id="dataTables-example">
+                <thead>
+                    <tr>
+                        <th>Data/Hora Início do último backup</th>
+                        <th>Data/Hora Término do último backup</th>
+                        <th>Última atualização</th>
+                        <th>Percentual completo</th>
+                        <th>Status</th>
+                        <th>Log</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for backup in object_list%}
+
+                    <tr class="odd gradeX" id='{{backup.get_status_display}}'>
+                        <td>{% get_start_date backup.pk %}</td>
+                        <td>{% get_finish_date backup.pk %}</td>
+                        <td>{% last_update backup.pk %}</td>
+                        <td>{{backup.percents_completed}}%</td>
+                        <td>{{backup.get_status_display}}</td>
+                        <td>
+                            <center>
+                                <a href="{% url 'core:backup_lookup_log' backup.pk %}"><span class="glyphicon glyphicon-search" aria-hidden="true"></span></a>
+                            </center>
+                        </td>
+
+                    </tr>
+                    {% endfor %}
+
+                </tbody>
+            </table>
+        </div>
+        <!-- /.table-responsive -->
+    </div>
+</div>
+
+{% endblock %}

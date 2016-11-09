@@ -1,0 +1,45 @@
+{% extends 'menu.html' %}
+{% load static %}
+{% load count_bkps %}
+
+
+{% block content %}
+
+<div class='container'>
+<center><h2>Backup's Disponíveis</h2></center>
+<br>
+    <div class="panel-body">
+
+        <div class="dataTable_wrapper">
+            <table class="table table-striped table-bordered table-hover" id="dataTables-example">
+                <thead>
+                    <tr>
+                        <th>Backup</th>
+                        <th>Backups realizados</th>
+                        <th>Data/Hora Início do último backup</th>
+                        <th>Data/Hora Término do último backup</th>
+                        <th>Última atualização</th>
+                        <th>Status atual</th>
+
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for backup in object_list%}
+
+                    <tr class="odd gradeX" id="{% get_last_status backup.name%}">
+                        <td><a href="backup_lookup?backup_name={{backup.name}}">{{backup.name}}</a></td>
+                        <td>{% get_count_bkps backup.name %}</td>
+                        <td>{% get_last_start_date_bkp backup.name%}</td>
+                        <td>{% get_last_finish_date_bkp backup.name%}</td>
+                        <td>{% get_last_update backup.name%}</td>
+                        <td>{% get_last_status backup.name%}</td>
+                    </tr>
+                    {% endfor %}
+
+                </tbody>
+            </table>
+        </div>
+        <!-- /.table-responsive -->
+    </div>
+</div>
+{% endblock %}

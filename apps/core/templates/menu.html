@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load current from navigation %}
+
+
+
+
+{% block style %}
+    <link href="{% static "navbar-static-top.css" %}" rel="stylesheet">
+    <style type="text/css">
+        #Rodando{
+            background-color: #D3D3D3;
+        }
+        #Terminado{
+            background-color: #99ff99;
+        }
+        #Alerta{
+            background-color: #ff4c4c;
+        }
+    </style>
+
+{% endblock %}
+
+{% block nav-bar %}
+
+    <nav class="navbar navbar-default navbar-static-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="{% url 'core:home' %}"><i class=""></i>Backup Genomika</a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+          <li class="{% current 'core:home' '' %}"><a href="">Home</a></li>
+          <li class=""><a href="">Auditoria</a></li>
+          </ul>
+          <ul class="nav navbar-nav navbar-right">
+            <li class="dropdown active">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">{{user.username}} <span class="caret"></span></a>
+              <ul class="dropdown-menu">
+                <li><a href="">Mudar Senha</a></li>
+                <li role="separator" class="divider"></li>
+                <li><a href="">Sair</a></li>
+              </ul>
+            </li>
+          </ul>
+        </div><!--/.nav-collapse -->
+
+      </div>
+   </nav>
+   <div class='container'>
+    {% for message in messages %}
+      <div class="alert alert-{{message.tags}}">
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+        <center><strong>{{message}}</strong></center>
+      </div>
+    {% endfor %}
+
+    <ol class="breadcrumb">
+      {% for link in links %}
+        <li><a href="{{link.1}}">{{link.0}}</a></li>
+      {% endfor %}
+    </ol>
+    {% block content %}
+
+
+
+
+    {% endblock %}
+   </div>
+
+{% endblock %}
