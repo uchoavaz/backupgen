@@ -41,7 +41,8 @@ class BackupLookupView(ListView):
     def get_queryset(self):
         queryset = super(BackupLookupView, self).get_queryset()
         backup_name = self.request.GET.get('backup_name')
-        queryset = queryset.filter(name=backup_name)
+        queryset = queryset.filter(
+            name=backup_name).order_by('-start_backup_datetime')
         return queryset
 
 
