@@ -16,15 +16,24 @@ def get_count_bkps(backup_name):
 
 @register.assignment_tag
 def get_last_status_display(backup_name):
-    status = Backup.objects.filter(name=backup_name).last()
-    status = status.get_status_display()
-    return status
+    is_running = Backup.objects.filter(name=backup_name, status=1)
+    if is_running.exists():
+        return is_running.last().get_status_display()
+    else:
+        status = Backup.objects.filter(name=backup_name).last()
+        status = status.get_status_display()
+        return status
+
 
 @register.assignment_tag
 def get_last_status(backup_name):
-    status = Backup.objects.filter(name=backup_name).last()
-    status = status.get_status_display().replace(' ','_')
-    return status
+    is_running = Backup.objects.filter(name=backup_name, status=1)
+    if is_running.exists():
+        return is_running.last().get_status_display().replace(' ', '_')
+    else:
+        status = Backup.objects.filter(name=backup_name).last()
+        status = status.get_status_display().replace(' ', '_')
+        return status
 
 
 @register.assignment_tag
