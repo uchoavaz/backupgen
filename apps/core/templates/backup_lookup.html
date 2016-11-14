@@ -25,7 +25,7 @@
                 <tbody>
                     {% for backup in object_list%}
 
-                    <tr class="odd gradeX" id='{{backup.get_status_display}}'>
+                    <tr class="odd gradeX" id='{% get_status_display backup.pk %}'>
                         <td>{% get_start_date backup.pk %}</td>
                         <td>{% get_finish_date backup.pk %}</td>
                         <td>{% last_update backup.pk %}</td>

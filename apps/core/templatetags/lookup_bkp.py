@@ -42,7 +42,14 @@ def get_start_date(bkp_pk):
 
 
 @register.assignment_tag
-def get_log_error(bkp_pk):
-    bkp = BackupLog.objects.get(pk=bkp_pk)
-    import ipdb;ipdb.set_trace()
-    return bkp.success
+def get_log_status(bkp_pk):
+    status_log = BackupLog.objects.get(pk=bkp_pk).get_status_display()
+    status_log = status_log.replace(' ','_')
+    return status_log
+
+
+@register.assignment_tag
+def get_status_display(bkp_pk):
+    status_display = Backup.objects.get(pk=bkp_pk).get_status_display()
+    status_display = status_display.replace(' ', '_')
+    return status_display

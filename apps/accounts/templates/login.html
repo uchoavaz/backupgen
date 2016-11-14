@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block style %}
+  <link href="{% static "signin.css" %}" rel="stylesheet">
+{% endblock %}
+
+{% block login %}
+
+<style type="text/css">
+  #error{
+    color: red;
+  }
+</style>
+
+<div class="container">
+  <center><h1> Backup Genomika</h1></center>
+  <br>
+
+  <form class="form-signin" method="POST">
+    {% csrf_token %}
+    <input type="text" id="inputEmail" name="email" class="form-control" placeholder="{{email_label}}" required autofocus>
+    <input type="password" name="password" id="inputPassword" class="form-control" placeholder="{{password_label}}" required>
+
+
+    <div class="checkbox">
+
+    </div>
+    <button class="btn btn-lg btn-primary btn-block" type="submit">Entrar</button>
+    <br>
+    {% for message in messages %}
+      <div class="alert alert-{{message.tags}}">
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+        <center><strong>{{message}}</strong></center>
+      </div>
+    {% endfor %}
+  </form>
+
+</div> <!-- /container -->
+{% endblock %}

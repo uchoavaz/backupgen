@@ -1,12 +1,33 @@
 
+from apps.accounts.views import LoginRequiredView
 from django.core.urlresolvers import reverse
 from django.views.generic import ListView
 from apps.core.models import Backup
 from apps.core.models import BackupLog
+from apps.core.models import SystemInfo
 from django.utils import timezone
 
+class SystemInfoView(ListView):
 
-class HomeView(ListView):
+    def get_context_data(self, **kwargs):
+        context = super(SystemInfoView, self).get_context_data(**kwargs)
+        system_info = SystemInfo.objects.all()
+        context['system_info'] = True
+        context['request'] = self.request
+        try:
+            last_system_info = system_info.last()
+            context['brand'] = last_system_info.brand
+            context['designed_by'] = last_system_info.designed_by
+            context['version'] = last_system_info.version
+        except AssertionError:
+            context['brand'] = ''
+            context['designed_by'] = ''
+            context['version'] = ''
+            context['system_info'] = False
+
+        return context
+
+class HomeView(LoginRequiredView, SystemInfoView, ListView):
     template_name = "home.html"
     model = Backup
 
@@ -22,7 +43,7 @@ class HomeView(ListView):
         return context
 
 
-class BackupLookupView(ListView):
+class BackupLookupView(LoginRequiredView, SystemInfoView, ListView):
     template_name = 'backup_lookup.html'
     model = Backup
 
@@ -46,7 +67,7 @@ class BackupLookupView(ListView):
         return queryset
 
 
-class BackupLookupLogView(ListView):
+class BackupLookupLogView(LoginRequiredView, SystemInfoView, ListView):
     template_name = 'bkp_lookup_log.html'
     model = BackupLog
 
@@ -79,7 +100,8 @@ class BackupLookupLogView(ListView):
     def get_queryset(self):
         queryset = super(BackupLookupLogView, self).get_queryset()
         backup_pk = self.kwargs['pk']
-        queryset = queryset.filter(backup__pk=backup_pk)
+        queryset = queryset.filter(backup__pk=backup_pk).order_by(
+            'log_datetime')
         return queryset
 
 

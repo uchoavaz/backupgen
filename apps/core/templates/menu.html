@@ -11,11 +11,11 @@
         #Rodando{
             background-color: #D3D3D3;
         }
-        #Terminado{
+        #Terminado_com_sucesso{
             background-color: #99ff99;
         }
-        #Alerta{
-            background-color: #ff4c4c;
+        #Terminado_com_erro{
+            background-color: #ffcccc;
         }
     </style>
 
@@ -43,9 +43,9 @@
             <li class="dropdown active">
               <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">{{user.username}} <span class="caret"></span></a>
               <ul class="dropdown-menu">
-                <li><a href="">Mudar Senha</a></li>
+                <li><a href="{% url 'accounts:password' %}">Mudar Senha</a></li>
                 <li role="separator" class="divider"></li>
-                <li><a href="">Sair</a></li>
+                <li><a href="{% url 'accounts:logout' %}">Sair</a></li>
               </ul>
             </li>
           </ul>

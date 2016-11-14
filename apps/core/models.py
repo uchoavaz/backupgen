@@ -4,10 +4,20 @@ from django.utils import timezone
 
 STATUS_CHOICES = (
     (1, 'Rodando'),
-    (2, 'Terminado'),
-    (3, 'Alerta')
+    (2, 'Terminado com sucesso'),
+    (3, 'Terminado com erro')
 
 )
+
+class SystemInfo(models.Model):
+    brand = models.CharField(verbose_name="Brand", max_length=50)
+    designed_by = models.CharField(verbose_name="Designed by", max_length=50)
+    version = models.CharField(verbose_name="Version", max_length=10)
+    date = models.DateField(verbose_name="Date", default=timezone.now())
+
+    class Meta:
+        verbose_name = (u'System Information')
+        verbose_name_plural = (u"Systems Informations")
 
 
 class Backup(models.Model):
@@ -31,9 +41,10 @@ class BackupLog(models.Model):
     backup = models.ForeignKey(
         Backup, verbose_name='backup', related_name='backup_log')
     log = models.TextField(verbose_name="Log")
-    success = models.BooleanField(verbose_name='Success ?', default=False)
     log_datetime = models.DateTimeField(
         'Finish backup datetime', default=timezone.now())
+    status = models.IntegerField('Status', choices=STATUS_CHOICES, default=1)
+
     class Meta:
         verbose_name = (u'Backup Log')
         verbose_name_plural = (u"Backups Log")

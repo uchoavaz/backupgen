@@ -52,7 +52,7 @@
 
                 <tr class="odd gradeX"   >
                     <td>{{backup_log.log_datetime|date:"d/m/Y"}} às {{backup_log.log_datetime|date:"H:i"}}</td>
-                    <td {% if not backup_log.success%} %} id="log_error" {% else %} id="log_ok" {% endif %}>{{backup_log.log}}</td>
+                    <td id="{% get_log_status backup_log.pk %}" >{{backup_log.log}}</td>
                 </tr>
                 {% endfor %}
 

@@ -1,6 +1,7 @@
 from django.contrib import admin
 from .models import Backup
 from .models import BackupLog
+from .models import SystemInfo
 
 
 class BackupAdmin(admin.ModelAdmin):
@@ -24,15 +25,20 @@ class BackupAdmin(admin.ModelAdmin):
 class BackupLogAdmin(admin.ModelAdmin):
     list_display = (
         'log',
-        'success',
+        'status',
         'backup'
     )
 
     search_fields = [
         'log',
-        'success',
+        'status',
     ]
 
 
+class SystemInfoAdmin(admin.ModelAdmin):
+    list_display = ('brand', 'designed_by', 'version', 'date')
+
+
+admin.site.register(SystemInfo, SystemInfoAdmin)
 admin.site.register(BackupLog, BackupLogAdmin)
 admin.site.register(Backup, BackupAdmin)
