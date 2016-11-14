@@ -38,17 +38,27 @@ def get_last_status(backup_name):
 
 @register.assignment_tag
 def get_last_start_date_bkp(backup_name):
-    bkp = Backup.objects.filter(name=backup_name).last()
-    date = timezone.localtime(bkp.start_backup_datetime)
-    return date.strftime('%d/%m/%Y às %H:%M Hrs.')
+    is_running = Backup.objects.filter(name=backup_name, status=1)
+    if is_running.exists():
+        date = timezone.localtime(is_running.last().start_backup_datetime)
+        return date.strftime('%d/%m/%Y às %H:%M Hrs.')
+    else:
+        bkp = Backup.objects.filter(name=backup_name).last()
+        date = timezone.localtime(bkp.start_backup_datetime)
+        return date.strftime('%d/%m/%Y às %H:%M Hrs.')
 
 
 @register.assignment_tag
 def get_last_finish_date_bkp(backup_name):
     try:
-        bkp = Backup.objects.filter(name=backup_name).last()
-        date = timezone.localtime(bkp.finish_backup_datetime)
-        return date.strftime('%d/%m/%Y às %H:%M Hrs.')
+        is_running = Backup.objects.filter(name=backup_name, status=1)
+        if is_running.exists():
+            date = timezone.localtime(is_running.last().finish_backup_datetime)
+            return date.strftime('%d/%m/%Y às %H:%M Hrs.')
+        else:
+            bkp = Backup.objects.filter(name=backup_name).last()
+            date = timezone.localtime(bkp.finish_backup_datetime)
+            return date.strftime('%d/%m/%Y às %H:%M Hrs.')
     except AttributeError:
         return '-'
 
