@@ -53,3 +53,9 @@ def get_status_display(bkp_pk):
     status_display = Backup.objects.get(pk=bkp_pk).get_status_display()
     status_display = status_display.replace(' ', '_')
     return status_display
+
+
+@register.assignment_tag
+def transform_percentage(number):
+    percentage = str(number).replace(',', '.')
+    return percentage
