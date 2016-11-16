@@ -14,7 +14,10 @@
         #Terminado_com_sucesso{
             background-color: #99ff99;
         }
-        #Terminado_com_erro{
+        #Alerta{
+            background-color: #ffff99;
+        }
+        #Erro{
             background-color: #ffcccc;
         }
     </style>
@@ -36,8 +39,8 @@
         </div>
         <div id="navbar" class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
-          <li class="{% current 'core:home' '' %}"><a href="">Home</a></li>
-          <li class=""><a href="">Auditoria</a></li>
+          <li class="{% current 'core:home' '' %}"><a href="{% url 'core:home' %}">Home</a></li>
+          <li class="{% current 'reports:report' '' %}"><a href="{% url 'reports:report' %}">Relatório</a></li>
           </ul>
           <ul class="nav navbar-nav navbar-right">
             <li class="dropdown active">

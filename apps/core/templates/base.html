@@ -78,6 +78,40 @@
     {% block nav-bar %}
     {% endblock %}
 
+    <script>
+         $(function() {
+          $("#start_date").datepicker({dateFormat: "dd/mm/yy", showOtherMonths: true,
+              changeMonth: true,
+              changeYear: true,
+              selectOtherMonths: true,
+              yearRange: '1900:2050',
+              dayNames: ["Domingo","Segunda","Terça","Quarta","Quinta","Sexta","Sábado","Domingo"],
+              dayNamesMin: ["D","S","T","Q","Q","S","S","D"],
+              dayNamesShort: ["Dom","Seg","Ter","Qua","Qui","Sex","Sáb","Dom"],
+              monthNames: ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"],
+              monthNamesShort: ["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"],
+              showAnim: "scale"
+           });
+        });
+        </script>
+
+    <script>
+         $(function() {
+          $("#end_date").datepicker({dateFormat: "dd/mm/yy", showOtherMonths: true,
+              changeMonth: true,
+              changeYear: true,
+              selectOtherMonths: true,
+              yearRange: '1900:2050',
+              dayNames: ["Domingo","Segunda","Terça","Quarta","Quinta","Sexta","Sábado","Domingo"],
+              dayNamesMin: ["D","S","T","Q","Q","S","S","D"],
+              dayNamesShort: ["Dom","Seg","Ter","Qua","Qui","Sex","Sáb","Dom"],
+              monthNames: ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"],
+              monthNamesShort: ["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"],
+              showAnim: "scale"
+           });
+        });
+        </script>
+
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
     <script src="{% static "bower_components/jquery/dist/jquery.min.js" %}"></script>
     <script>window.jQuery || document.write('<script src="{% static "assets/js/vendor/jquery.min.js" %}"><\/script>')</script>

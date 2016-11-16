@@ -1,0 +1,30 @@
+{% extends 'menu.html' %}
+{% load static %}
+
+{% block content %}
+
+<div class="container">
+    <form  action="" method="get">
+        <div class="col-sm-3 col-sm-offset-4">
+            <center><h2>Relatório</h2></center>
+            <hr>
+            <label for="exampleInputEmail1">Backup</label>
+            <select name="local_pk" class="form-control">
+              {% for backup in backups %}
+                <option value={{backup.name}}>{{backup.name}}</option>
+              {% endfor %}
+            </select>
+            <label for="exampleInputEmail1">Data início</label>
+            <input type="text" name='start_date' class="form-control" id="start_date" placeholder="{{start_date}}">
+            <label for="exampleInputEmail1">Data fim</label>
+            <input type="text" name='end_date' class="form-control" id="end_date" placeholder="{{end_date}}">
+            <br>
+            <button type="submit" class="btn btn-primary btn btn-default btn-lg">Baixar</button>
+            <br>
+            <br>
+        </div>
+
+    </form>
+</div>
+
+{% endblock %}

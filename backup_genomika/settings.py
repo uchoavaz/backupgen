@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'widget_tweaks',
     'apps.core',
     'apps.accounts',
+    'apps.reports',
 ]
 
 MIDDLEWARE_CLASSES = [

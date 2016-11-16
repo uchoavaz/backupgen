@@ -5,9 +5,10 @@ from django.utils import timezone
 STATUS_CHOICES = (
     (1, 'Rodando'),
     (2, 'Terminado com sucesso'),
-    (3, 'Terminado com erro')
-
+    (3, 'Alerta'),
+    (4, 'Erro')
 )
+
 
 class SystemInfo(models.Model):
     brand = models.CharField(verbose_name="Brand", max_length=50)

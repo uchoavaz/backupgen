@@ -22,4 +22,6 @@ urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^', include('core.urls', namespace='core')),
     url(r'^auth/', include('accounts.urls', namespace='accounts')),
+    url(r'^report/', include('reports.urls', namespace='reports')),
+
 ]

@@ -16,49 +16,34 @@ def get_count_bkps(backup_name):
 
 @register.assignment_tag
 def get_last_status_display(backup_name):
-    is_running = Backup.objects.filter(name=backup_name, status=1)
-    if is_running.exists():
-        return is_running.last().get_status_display()
-    else:
-        status = Backup.objects.filter(name=backup_name).last()
-        status = status.get_status_display()
-        return status
+    bkp = Backup.objects.filter(name=backup_name)
+    bkp = bkp.order_by('start_backup_datetime')
+    return bkp.last().get_status_display()
 
 
 @register.assignment_tag
 def get_last_status(backup_name):
-    is_running = Backup.objects.filter(name=backup_name, status=1)
-    if is_running.exists():
-        return is_running.last().get_status_display().replace(' ', '_')
-    else:
-        status = Backup.objects.filter(name=backup_name).last()
-        status = status.get_status_display().replace(' ', '_')
-        return status
+    bkp = Backup.objects.filter(name=backup_name)
+    bkp = bkp.order_by('start_backup_datetime')
+    return bkp.last().get_status_display().replace(' ', '_')
 
 
 @register.assignment_tag
 def get_last_start_date_bkp(backup_name):
-    is_running = Backup.objects.filter(name=backup_name, status=1)
-    if is_running.exists():
-        date = timezone.localtime(is_running.last().start_backup_datetime)
-        return date.strftime('%d/%m/%Y às %H:%M Hrs.')
-    else:
-        bkp = Backup.objects.filter(name=backup_name).last()
-        date = timezone.localtime(bkp.start_backup_datetime)
-        return date.strftime('%d/%m/%Y às %H:%M Hrs.')
+    bkp = Backup.objects.filter(name=backup_name)
+    bkp = bkp.order_by('start_backup_datetime')
+    date = timezone.localtime(bkp.last().start_backup_datetime)
+    return date.strftime('%d/%m/%Y às %H:%M Hrs.')
 
 
 @register.assignment_tag
 def get_last_finish_date_bkp(backup_name):
     try:
-        is_running = Backup.objects.filter(name=backup_name, status=1)
-        if is_running.exists():
-            date = timezone.localtime(is_running.last().finish_backup_datetime)
-            return date.strftime('%d/%m/%Y às %H:%M Hrs.')
-        else:
-            bkp = Backup.objects.filter(name=backup_name).last()
-            date = timezone.localtime(bkp.finish_backup_datetime)
-            return date.strftime('%d/%m/%Y às %H:%M Hrs.')
+        bkp = Backup.objects.filter(name=backup_name)
+        bkp = bkp.order_by('start_backup_datetime')
+        date = timezone.localtime(bkp.last().finish_backup_datetime)
+        return date.strftime('%d/%m/%Y às %H:%M Hrs.')
+
     except AttributeError:
         return '-'
 
