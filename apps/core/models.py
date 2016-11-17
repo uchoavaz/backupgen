@@ -28,6 +28,15 @@ class Backup(models.Model):
         'Start backup datetime', default=timezone.now())
     finish_backup_datetime = models.DateTimeField(
         'Finish backup datetime', null=True, blank=True)
+    databases_passed = models.TextField('Databases', null=True, blank=True)
+    database_ip = models.CharField(
+        'Database Ip', max_length=15, null=True, blank=True)
+    storage_ip = models.CharField(
+        'Storage Ip', max_length=15, null=True, blank=True)
+    path_folders_pass = models.TextField(
+        'Path folders pass', null=True, blank=True)
+    storage_destiny_path = models.TextField(
+        'storage_destiny_path', default='', null=True, blank=True)
     status = models.IntegerField('Status', choices=STATUS_CHOICES, default=1)
 
     class Meta:
