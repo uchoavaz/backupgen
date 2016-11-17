@@ -4,8 +4,11 @@
 
 {% block content %}
 
+<script type="text/javascript" src="{% static 'js/gui_lookup.js' %}"></script>
 
 <div class='container'>
+    <input type='hidden' id="backup_name" value='{{backup_name}}'></input>
+
     <center><h2>{{backup_name}}</h2></center>
     <hr>
 <br>
@@ -23,8 +26,8 @@
                         <th>Log</th>
                     </tr>
                 </thead>
-                <tbody>
-                    {% for backup in object_list%}
+                <tbody id='body_lookups'>
+<!--                     {% for backup in object_list%}
 
                     <tr class="odd gradeX" id='{% get_status_display backup.pk %}'>
                         <td>{% get_start_date backup.pk %}</td>
@@ -45,7 +48,7 @@
                         </td>
 
                     </tr>
-                    {% endfor %}
+                    {% endfor %} -->
 
                 </tbody>
             </table>

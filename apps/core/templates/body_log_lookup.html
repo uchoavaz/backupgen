@@ -1,23 +1,9 @@
-{% extends 'menu.html' %}
 {% load static %}
 {% load lookup_bkp %}
 
-{% block content %}
-<script type="text/javascript" src="{% static 'js/gui_log_lookup.js' %}"></script>
-
-<style type="text/css">
-	#log_error{
-	    background-color: #ff4c4c;
-	}
-	#log_ok{
-	    background-color: #99ff99;
-	}
-</style>
-
-<div id="body_log_lookup" class='container'>
-	<input type='hidden' id="backup_pk" value='{{backup_info.pk}}'></input>
-	<center><h2>{{backup_info.name}}</h2></center>
-	<hr>
+<input type='hidden' id="backup_pk" value='{{backup_info.pk}}'></input>
+<center><h2>{{backup_info.name}}</h2></center>
+<hr>
 
 <div class="col-md-6 col-sm-offset-3">
 	<table class="table"> 
@@ -64,6 +50,3 @@
     </div>
     <!-- /.table-responsive -->
 </div>
-</div>
-
-{% endblock %}

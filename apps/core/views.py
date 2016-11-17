@@ -2,10 +2,15 @@
 from apps.accounts.views import LoginRequiredView
 from django.core.urlresolvers import reverse
 from django.views.generic import ListView
+from django.views.generic import View
 from apps.core.models import Backup
 from apps.core.models import BackupLog
 from apps.core.models import SystemInfo
 from django.utils import timezone
+from django.template import loader
+from django.template import RequestContext
+from django.shortcuts import render_to_response
+
 
 class SystemInfoView(ListView):
 
@@ -26,6 +31,7 @@ class SystemInfoView(ListView):
             context['system_info'] = False
 
         return context
+
 
 class HomeView(LoginRequiredView, SystemInfoView, ListView):
     template_name = "home.html"
@@ -104,6 +110,53 @@ class BackupLookupLogView(LoginRequiredView, SystemInfoView, ListView):
             'log_datetime')
         return queryset
 
+
+def get_lookup(request):
+    bkp_name = request.GET.get('backup_name')
+    bkp = Backup.objects.filter(name=bkp_name).order_by('-start_backup_datetime')
+    template = 'tr_body_lookup.html'
+    return render_to_response(
+        template,
+        {'object_list': bkp},
+        context_instance=RequestContext(request)
+    )
+
+
+def get_home(request):
+    bkp = Backup.objects.all().values('name').distinct()
+    template = 'tr_body_home.html'
+    return render_to_response(
+        template,
+        {'object_list': bkp},
+        context_instance=RequestContext(request)
+    )
+
+
+def get_log_lookup(request):
+    backup_pk = request.GET.get('backup_pk')
+    bkp = Backup.objects.get(pk=backup_pk)
+    finish_date = bkp.finish_backup_datetime
+    try:
+        finish_date = timezone.localtime(finish_date).strftime(
+            '%d/%m/%Y às %H:%M')
+    except AttributeError:
+        finish_date = 'Não concluído'
+
+    start_date = bkp.start_backup_datetime.strftime(
+        '%d/%m/%Y às %H:%M')
+    bkp_log = BackupLog.objects.filter(backup__pk=backup_pk).order_by(
+        'log_datetime')
+    template = 'body_log_lookup.html'
+    return render_to_response(
+        template,
+        {
+            'object_list': bkp_log,
+            'finish_date': finish_date,
+            'start_date': start_date,
+            'backup_info': bkp
+        },
+        context_instance=RequestContext(request)
+    )
 
 backup_lookup_log = BackupLookupLogView.as_view()
 backup_lookup = BackupLookupView.as_view()

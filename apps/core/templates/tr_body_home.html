@@ -1,0 +1,19 @@
+{% load static %}
+{% load count_bkps %}
+
+{% for backup in object_list%}
+
+    <tr class="odd gradeX" id="{% get_last_status backup.name%}">
+        <td>{{backup.name}}</td>
+        <td>{% get_count_bkps backup.name %}</td>
+        <td>{% get_last_start_date_bkp backup.name%}</td>
+        <td>{% get_last_finish_date_bkp backup.name%}</td>
+        <td>{% get_last_update backup.name%}</td>
+        <td>{% get_last_status_display backup.name%}</td>
+        <td>
+            <center>
+                <a href="backup_lookup?backup_name={{backup.name}}"><span class="glyphicon glyphicon-search" aria-hidden="true"></span></a>
+            </center>
+        </td>
+    </tr>
+{% endfor %}

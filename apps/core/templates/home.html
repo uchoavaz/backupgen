@@ -4,10 +4,11 @@
 
 
 {% block content %}
+<script type="text/javascript" src="{% static 'js/gui_home.js' %}"></script>
 
 <div class='container'>
-<center><h2>Backup's Disponíveis</h2></center>
-<hr>
+    <center><h2>Backup's Disponíveis</h2></center>
+    <hr>
 <br>
     <div class="panel-body">
 
@@ -25,8 +26,8 @@
 
                     </tr>
                 </thead>
-                <tbody>
-                    {% for backup in object_list%}
+                <tbody id='body_home'>
+<!--                     {% for backup in object_list%}
 
                     <tr class="odd gradeX" id="{% get_last_status backup.name%}">
                         <td>{{backup.name}}</td>
@@ -41,7 +42,7 @@
                             </center>
                         </td>
                     </tr>
-                    {% endfor %}
+                    {% endfor %} -->
 
                 </tbody>
             </table>
