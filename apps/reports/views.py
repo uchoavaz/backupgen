@@ -45,26 +45,42 @@ class ReportView(TemplateView):
             'attachment; filename="{0}_backup_report{1}.csv"'.format(
                 file_name, date_str)
 
-        writer = csv.writer(response, delimiter=',')
+        writer = csv.writer(response, delimiter=';')
         header = [
             Backup._meta.get_field("name").verbose_name.title(),
             Backup._meta.get_field(
                 "start_backup_datetime").verbose_name.title(),
             Backup._meta.get_field(
                 "finish_backup_datetime").verbose_name.title(),
-            Backup._meta.get_field("status").verbose_name.title()
+            Backup._meta.get_field("status").verbose_name.title(),
+            Backup._meta.get_field("database_ip").verbose_name.title(),
+            Backup._meta.get_field("databases_passed").verbose_name.title(),
+            Backup._meta.get_field("storage_ip").verbose_name.title(),
+            Backup._meta.get_field(
+                "storage_destiny_path").verbose_name.title(),
+            Backup._meta.get_field("path_folders_pass").verbose_name.title()
 
         ]
         writer.writerow(header)
-
         for line in queryset:
+            try:
+                finish_date = line.finish_backup_datetime.strftime(
+                    '%d-%m-%Y %H:%M')
+            except AttributeError:
+                finish_date = 'Não Concluido'
             writer.writerow([
                 line.name,
                 line.start_backup_datetime.strftime('%d-%m-%Y %H:%M'),
-                line.finish_backup_datetime.strftime('%d-%m-%Y %H:%M'),
-                line.get_status_display()
+                finish_date,
+                line.get_status_display(),
+                line.database_ip,
+                line.databases_passed,
+                line.storage_ip,
+                line.storage_destiny_path,
+                line.path_folders_pass
             ])
         return response
+
 
     def get(self, request, *args, **kwargs):
         try:
@@ -82,7 +98,6 @@ class ReportView(TemplateView):
                 start_date_str = ''
                 end_date_str = ''
                 date_str = ''
-
                 if start_date != '':
                     queryset = queryset.filter(
                         start_backup_datetime__gte=start_date)
