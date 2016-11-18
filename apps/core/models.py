@@ -22,21 +22,21 @@ class SystemInfo(models.Model):
 
 
 class Backup(models.Model):
-    name = models.CharField('Backup name', max_length=50)
-    percents_completed = models.FloatField('Percents completed', default=0)
+    name = models.CharField('Nome do backup', max_length=50)
+    percents_completed = models.FloatField('Percentual Completo', default=0)
     start_backup_datetime = models.DateTimeField(
-        'Start backup datetime', default=timezone.now())
+        'Hora de início do backup', default=timezone.now())
     finish_backup_datetime = models.DateTimeField(
-        'Finish backup datetime', null=True, blank=True)
-    databases_passed = models.TextField('Databases', null=True, blank=True)
+        'Hora de fim do backuo', null=True, blank=True)
+    databases_passed = models.TextField('Bancos passados', null=True, blank=True)
     database_ip = models.CharField(
-        'Database Ip', max_length=15, null=True, blank=True)
+        'Ip do banco', max_length=15, null=True, blank=True)
     storage_ip = models.CharField(
-        'Storage Ip', max_length=15, null=True, blank=True)
+        'Ip do storage', max_length=15, null=True, blank=True)
     path_folders_pass = models.TextField(
-        'Path folders pass', null=True, blank=True)
+        'Caminho das pastas no storage', null=True, blank=True)
     storage_destiny_path = models.TextField(
-        'storage_destiny_path', default='', null=True, blank=True)
+        'Caminho das pastas a passar', default='', null=True, blank=True)
     status = models.IntegerField('Status', choices=STATUS_CHOICES, default=1)
 
     class Meta:
