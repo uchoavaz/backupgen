@@ -53,8 +53,9 @@ class ReportView(TemplateView):
             Backup._meta.get_field(
                 "finish_backup_datetime").verbose_name.title(),
             Backup._meta.get_field("status").verbose_name.title(),
-            Backup._meta.get_field("database_ip").verbose_name.title(),
+            Backup._meta.get_field("database_storage_ip").verbose_name.title(),
             Backup._meta.get_field("databases_passed").verbose_name.title(),
+            Backup._meta.get_field("folders_passed").verbose_name.title(),
             Backup._meta.get_field("storage_ip").verbose_name.title(),
             Backup._meta.get_field(
                 "storage_destiny_path").verbose_name.title(),
@@ -73,8 +74,9 @@ class ReportView(TemplateView):
                 line.start_backup_datetime.strftime('%d-%m-%Y %H:%M'),
                 finish_date,
                 line.get_status_display(),
-                line.database_ip,
+                line.database_storage_ip,
                 line.databases_passed,
+                line.folders_passed,
                 line.storage_ip,
                 line.storage_destiny_path,
                 line.path_folders_pass

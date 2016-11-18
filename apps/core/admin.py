@@ -12,7 +12,8 @@ class BackupAdmin(admin.ModelAdmin):
         'start_backup_datetime',
         'finish_backup_datetime',
         'databases_passed',
-        'database_ip',
+        'folders_passed',
+        'database_storage_ip',
         'storage_ip',
         'path_folders_pass',
         'storage_destiny_path'
@@ -25,7 +26,8 @@ class BackupAdmin(admin.ModelAdmin):
         'start_backup_datetime',
         'finish_backup_datetime',
         'databases_passed',
-        'database_ip',
+        'folders_passed',
+        'database_storage_ip',
         'storage_ip',
         'path_folders_pass',
         'storage_destiny_path'

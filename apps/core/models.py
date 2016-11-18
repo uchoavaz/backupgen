@@ -29,14 +29,16 @@ class Backup(models.Model):
     finish_backup_datetime = models.DateTimeField(
         'Hora de fim do backuo', null=True, blank=True)
     databases_passed = models.TextField('Bancos passados', null=True, blank=True)
-    database_ip = models.CharField(
-        'Ip do banco', max_length=15, null=True, blank=True)
+    database_storage_ip = models.CharField(
+        'Ip do banco e das pastas', max_length=15, null=True, blank=True)
     storage_ip = models.CharField(
         'Ip do storage', max_length=15, null=True, blank=True)
     path_folders_pass = models.TextField(
         'Caminho das pastas no storage', null=True, blank=True)
     storage_destiny_path = models.TextField(
-        'Caminho das pastas a passar', default='', null=True, blank=True)
+        'Caminho no storage dos backups', default='', null=True, blank=True)
+    folders_passed = models.TextField(
+        'Pastas passadas para o storage', default='', null=True, blank=True)
     status = models.IntegerField('Status', choices=STATUS_CHOICES, default=1)
 
     class Meta:
