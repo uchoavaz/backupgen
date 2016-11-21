@@ -55,6 +55,7 @@ class ReportView(TemplateView):
             Backup._meta.get_field("status").verbose_name.title(),
             Backup._meta.get_field("database_storage_ip").verbose_name.title(),
             Backup._meta.get_field("databases_passed").verbose_name.title(),
+            Backup._meta.get_field("databases_to_pass").verbose_name.title(),
             Backup._meta.get_field("folders_passed").verbose_name.title(),
             Backup._meta.get_field("storage_ip").verbose_name.title(),
             Backup._meta.get_field(
@@ -76,6 +77,7 @@ class ReportView(TemplateView):
                 line.get_status_display(),
                 line.database_storage_ip,
                 line.databases_passed,
+                line.databases_to_pass,
                 line.folders_passed,
                 line.storage_ip,
                 line.storage_destiny_path,

@@ -29,6 +29,7 @@ class Backup(models.Model):
     finish_backup_datetime = models.DateTimeField(
         'Hora de fim do backuo', null=True, blank=True)
     databases_passed = models.TextField('Bancos passados', null=True, blank=True)
+    databases_to_pass = models.TextField('Bancos a passar', null=True, blank=True)
     database_storage_ip = models.CharField(
         'Ip do banco e das pastas', max_length=15, null=True, blank=True)
     storage_ip = models.CharField(
