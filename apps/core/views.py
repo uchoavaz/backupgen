@@ -1,18 +1,18 @@
 
-from apps.accounts.views import LoginRequiredView
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.urlresolvers import reverse_lazy
 from django.core.urlresolvers import reverse
 from django.views.generic import ListView
-from django.views.generic import View
 from apps.core.models import Backup
 from apps.core.models import BackupLog
 from apps.core.models import SystemInfo
 from django.utils import timezone
-from django.template import loader
 from django.template import RequestContext
 from django.shortcuts import render_to_response
 
 
-class SystemInfoView(ListView):
+class SystemInfoView(LoginRequiredMixin, ListView):
+    login_url = reverse_lazy("accounts:login")
 
     def get_context_data(self, **kwargs):
         context = super(SystemInfoView, self).get_context_data(**kwargs)
@@ -33,7 +33,7 @@ class SystemInfoView(ListView):
         return context
 
 
-class HomeView(LoginRequiredView, SystemInfoView, ListView):
+class HomeView(SystemInfoView, ListView):
     template_name = "home.html"
     model = Backup
 
@@ -49,7 +49,7 @@ class HomeView(LoginRequiredView, SystemInfoView, ListView):
         return context
 
 
-class BackupLookupView(LoginRequiredView, SystemInfoView, ListView):
+class BackupLookupView(SystemInfoView, ListView):
     template_name = 'backup_lookup.html'
     model = Backup
 
@@ -73,7 +73,7 @@ class BackupLookupView(LoginRequiredView, SystemInfoView, ListView):
         return queryset
 
 
-class BackupLookupLogView(LoginRequiredView, SystemInfoView, ListView):
+class BackupLookupLogView(SystemInfoView, ListView):
     template_name = 'bkp_lookup_log.html'
     model = BackupLog
 

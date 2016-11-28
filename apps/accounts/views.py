@@ -48,11 +48,8 @@ def logout(request):
     return redirect(reverse_lazy('accounts:login'))
 
 
-class LoginRequiredView(LoginRequiredMixin):
+class PasswordView(LoginRequiredMixin, FormView):
     login_url = reverse_lazy("accounts:login")
-
-
-class PasswordView(LoginRequiredView, FormView):
     template_name = 'password.html'
     form_class = PasswordForm
     success_url = reverse_lazy('core:home')
@@ -67,6 +64,6 @@ class PasswordView(LoginRequiredView, FormView):
         messages.success(
             self.request,
             'Sua senha foi alterada! Entre no sistema com sua nova senha')
-        return super(PasswordView, self).form_valid(form)
+        return redirect(reverse_lazy('accounts:logout'))
 
 password = PasswordView.as_view()
