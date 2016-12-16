@@ -1,4 +1,5 @@
 
+import math
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.urlresolvers import reverse_lazy
 from django.core.urlresolvers import reverse
@@ -9,6 +10,7 @@ from apps.core.models import SystemInfo
 from django.utils import timezone
 from django.template import RequestContext
 from django.shortcuts import render_to_response
+from apps.core.models import STATUS_CHOICES
 
 
 class SystemInfoView(LoginRequiredMixin, ListView):
@@ -52,10 +54,12 @@ class HomeView(SystemInfoView, ListView):
 class BackupLookupView(SystemInfoView, ListView):
     template_name = 'backup_lookup.html'
     model = Backup
+    paginated_by = 10
 
     def get_context_data(self, **kwargs):
         context = super(BackupLookupView, self).get_context_data(**kwargs)
         bkp_name = self.request.GET.get('backup_name')
+        search_request = self.request.GET.get('search')
         context['backup_name'] = bkp_name
         link_home = reverse('core:home')
         link_backup_lookup = reverse(
@@ -63,14 +67,73 @@ class BackupLookupView(SystemInfoView, ListView):
         context['links'] = [
             ['Backups disponíveis', link_home], [bkp_name, link_backup_lookup]
         ]
+        context['link_backup_lookup'] = link_backup_lookup
+        pages_list = self.get_pages_list()
+        page = self.get_page()
+        context['page'] = page
+        context['paginated_by'] = self.paginated_by
+        context['pagination'] = self.get_actual_page_in_list(pages_list, page)
+        if search_request is None:
+            search_request = ''
+        context['search_field'] = search_request
         return context
 
     def get_queryset(self):
         queryset = super(BackupLookupView, self).get_queryset()
         backup_name = self.request.GET.get('backup_name')
+        page = self.get_page()
         queryset = queryset.filter(
             name=backup_name).order_by('-start_backup_datetime')
+        queryset = self.search(queryset)
+        minimum = (page - 1) * self.paginated_by
+        maximum = page * self.paginated_by
+
+        queryset = queryset[minimum:maximum]
         return queryset
+
+    def search(self, queryset):
+        field = self.request.GET.get('search')
+
+        if field is not None and field != '':
+                status = self.get_status(field, STATUS_CHOICES)
+                queryset = queryset.filter(status=status)
+        return queryset
+
+    def get_page(self):
+        page = None
+        try:
+            page = int(self.request.GET.get('page'))
+        except TypeError:
+            page = 1
+
+        return page
+
+    def get_status(self, name, choices):
+        for choice in choices:
+            if name.lower() in choice[1].lower():
+                return choice[0]
+        return 0
+
+    def get_pages_list(self):
+        backup_name = self.request.GET.get('backup_name')
+        objects_qt = self.model.objects.filter(name=backup_name)
+        objects_qt = self.search(objects_qt).count()
+        pages = math.ceil(objects_qt / self.paginated_by)
+        range_list = range(1, (pages + 1))
+        if len(range_list) == 0:
+            range_list = range(1, 2)
+        return range_list
+
+    def get_actual_page_in_list(self, pages_list, actual_page):
+        pagination = []
+        for page in pages_list:
+            t = []
+            if actual_page == page:
+                t = ['active', page]
+            else:
+                t = ['', page]
+            pagination.append(t)
+        return pagination
 
 
 class BackupLookupLogView(SystemInfoView, ListView):
@@ -113,13 +176,35 @@ class BackupLookupLogView(SystemInfoView, ListView):
 
 def get_lookup(request):
     bkp_name = request.GET.get('backup_name')
-    bkp = Backup.objects.filter(name=bkp_name).order_by('-start_backup_datetime')
+    page = int(request.GET.get('page'))
+    search = request.GET.get('search')
+    print (search)
+
+    paginated_by = int(request.GET.get('paginated_by'))
+    queryset = Backup.objects.filter(
+        name=bkp_name).order_by('-start_backup_datetime')
+
+    if search is not None and search != '':
+            status = get_status(search, STATUS_CHOICES)
+            queryset = queryset.filter(status=status)
+
+    minimum = (page - 1) * paginated_by
+    maximum = page * paginated_by
+
+    queryset = queryset[minimum:maximum]
     template = 'tr_body_lookup.html'
     return render_to_response(
         template,
-        {'object_list': bkp},
+        {'object_list': queryset},
         context_instance=RequestContext(request)
     )
+
+
+def get_status(name, choices):
+    for choice in choices:
+        if name.lower() in choice[1].lower():
+            return choice[0]
+    return 0
 
 
 def get_home(request):
