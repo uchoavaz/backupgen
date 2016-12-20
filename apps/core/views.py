@@ -80,22 +80,63 @@ class BackupLookupView(SystemInfoView, ListView):
 
     def get_queryset(self):
         queryset = super(BackupLookupView, self).get_queryset()
+        field = self.request.GET.get('search')
         backup_name = self.request.GET.get('backup_name')
         page = self.get_page()
         queryset = queryset.filter(
             name=backup_name).order_by('-start_backup_datetime')
-        queryset = self.search(queryset)
+        queryset = self.search_status(queryset, field)
+        queryset = self.search_initial_datetime(queryset, field, self.model)
+        queryset = self.search_finish_datetime(queryset, field, self.model)
         minimum = (page - 1) * self.paginated_by
         maximum = page * self.paginated_by
 
         queryset = queryset[minimum:maximum]
         return queryset
 
-    def search(self, queryset):
-        field = self.request.GET.get('search')
+    def search_finish_datetime(self, queryset, field, model):
+        if field is not None and field != '':
+
+            try:
+                field = int(field)
+
+                if not queryset:
+                    queryset = model.objects.filter(
+                        finish_backup_datetime__year=field)
+                if not queryset:
+                    queryset = model.objects.filter(
+                        finish_backup_datetime__month=field)
+                if not queryset:
+                    queryset = model.objects.filter(
+                        finish_backup_datetime__day=field)
+            except ValueError:
+                pass
+        return queryset
+
+    def search_initial_datetime(self, queryset, field, model):
+        if field is not None and field != '':
+
+            try:
+                field = int(field)
+
+                if not queryset:
+                    queryset = model.objects.filter(
+                        start_backup_datetime__year=field)
+                if not queryset:
+                    queryset = model.objects.filter(
+                        start_backup_datetime__month=field)
+                if not queryset:
+                    queryset = model.objects.filter(
+                        start_backup_datetime__day=field)
+            except ValueError:
+                pass
+        return queryset
+
+    def search_status(self, queryset, field):
 
         if field is not None and field != '':
                 status = self.get_status(field, STATUS_CHOICES)
+                print (status)
                 queryset = queryset.filter(status=status)
         return queryset
 
@@ -117,7 +158,8 @@ class BackupLookupView(SystemInfoView, ListView):
     def get_pages_list(self):
         backup_name = self.request.GET.get('backup_name')
         objects_qt = self.model.objects.filter(name=backup_name)
-        objects_qt = self.search(objects_qt).count()
+        field = self.request.GET.get('search')
+        objects_qt = self.search_status(objects_qt, field).count()
         pages = math.ceil(objects_qt / self.paginated_by)
         range_list = range(1, (pages + 1))
         if len(range_list) == 0:
@@ -188,6 +230,38 @@ def get_lookup(request):
             status = get_status(search, STATUS_CHOICES)
             queryset = queryset.filter(status=status)
 
+    if search is not None and search != '':
+
+        try:
+            search = int(search)
+
+            if not queryset:
+                queryset = Backup.objects.filter(
+                    start_backup_datetime__year=search)
+            if not queryset:
+                queryset = Backup.objects.filter(
+                    start_backup_datetime__month=search)
+            if not queryset:
+                queryset = Backup.objects.filter(
+                    start_backup_datetime__day=search)
+        except ValueError:
+            pass
+    if search is not None and search != '':
+
+        try:
+            search = int(search)
+
+            if not queryset:
+                queryset = Backup.objects.filter(
+                    finish_backup_datetime__year=search)
+            if not queryset:
+                queryset = Backup.objects.filter(
+                    finish_backup_datetime__month=search)
+            if not queryset:
+                queryset = Backup.objects.filter(
+                    finish_backup_datetime__day=search)
+        except ValueError:
+            pass
     minimum = (page - 1) * paginated_by
     maximum = page * paginated_by
 
