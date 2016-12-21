@@ -157,10 +157,12 @@ class BackupLookupView(SystemInfoView, ListView):
 
     def get_pages_list(self):
         backup_name = self.request.GET.get('backup_name')
-        objects_qt = self.model.objects.filter(name=backup_name)
+        queryset = self.model.objects.filter(name=backup_name)
         field = self.request.GET.get('search')
-        objects_qt = self.search_status(objects_qt, field).count()
-        pages = math.ceil(objects_qt / self.paginated_by)
+        queryset = self.search_status(queryset, field)
+        queryset = self.search_initial_datetime(queryset, field, self.model)
+        queryset = self.search_finish_datetime(queryset, field, self.model)
+        pages = math.ceil(queryset.count() / self.paginated_by)
         range_list = range(1, (pages + 1))
         if len(range_list) == 0:
             range_list = range(1, 2)
@@ -300,8 +302,7 @@ def get_log_lookup(request):
             '%d/%m/%Y às %H:%M')
     except AttributeError:
         finish_date = 'Não concluído'
-
-    start_date = bkp.start_backup_datetime.strftime(
+    start_date = timezone.localtime(bkp.start_backup_datetime).strftime(
         '%d/%m/%Y às %H:%M')
     bkp_log = BackupLog.objects.filter(backup__pk=backup_pk).order_by(
         'log_datetime')
