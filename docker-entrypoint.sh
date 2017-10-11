@@ -1,4 +1,3 @@
-
 #!/bin/bash
 /usr/sbin/sshd -D &! 
 
@@ -15,8 +14,6 @@ cd ..
 cd backupgen
 
 git checkout $backup_genomika_branch
-
-cp /var/www/backupgen/.env /var/www/backupgen/
 
 pip3 install -r requirements.txt
 
