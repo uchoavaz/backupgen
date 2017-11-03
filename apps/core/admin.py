@@ -17,12 +17,12 @@ class BackupAdmin(admin.ModelAdmin):
         'database_storage_ip',
         'storage_ip',
         'path_folders_pass',
-        'storage_destiny_path'
+        'storage_destiny_path',
     )
 
     search_fields = [
         'name',
-        'percents_completed'
+        'percents_completed',
         'status',
         'start_backup_datetime',
         'finish_backup_datetime',
@@ -32,7 +32,7 @@ class BackupAdmin(admin.ModelAdmin):
         'database_storage_ip',
         'storage_ip',
         'path_folders_pass',
-        'storage_destiny_path'
+        'storage_destiny_path',
     ]
 
 
