@@ -21,6 +21,7 @@ if [ "$migrate" = true ] ; then
         python3 manage.py migrate
 fi
 
+crontab -r
 /var/www/backupgen/crontab.sh
 
 cron -f &! python3 manage.py runserver 0.0.0.0:$port
