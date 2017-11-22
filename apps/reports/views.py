@@ -1,9 +1,9 @@
-
 from django.core.exceptions import ObjectDoesNotExist
 from django.views.generic import TemplateView
 from django.http import HttpResponse
 from apps.core.models import Backup
 from django.contrib import messages
+from django.utils import timezone
 from datetime import datetime
 import csv
 
@@ -66,13 +66,15 @@ class ReportView(TemplateView):
         writer.writerow(header)
         for line in queryset:
             try:
-                finish_date = line.finish_backup_datetime.strftime(
-                    '%d-%m-%Y %H:%M')
+                finish_date = timezone.get_current_timezone().normalize(line.finish_backup_datetime)
+                finish_date = finish_date.strftime('%d-%m-%Y %H:%M')
             except AttributeError:
                 finish_date = 'Não Concluido'
+
+            start_date = timezone.get_current_timezone().normalize(line.start_backup_datetime)
             writer.writerow([
                 line.name,
-                line.start_backup_datetime.strftime('%d-%m-%Y %H:%M'),
+                start_date.strftime('%d-%m-%Y %H:%M'),
                 finish_date,
                 line.get_status_display(),
                 line.database_storage_ip,
