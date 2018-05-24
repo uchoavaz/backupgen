@@ -1,0 +1,19 @@
+version: '2'
+services:
+  flushdb:
+    image: dockerregistry.genomika.com/flushdb:base
+    environment:
+      ip_db_server: 172.16.225.17
+      pgpassword_server: g3n3t1c@
+      user_db_server: genomika
+      port_db_server: 5432
+      namedb_db_server: backup_genomika
+      ip_db_client: 172.16.225.18
+      pgpassword_client: g3n3t1c@
+      user_db_client: genomika
+      port_db_client: 5432
+      namedb_db_client: backup_genomika
+    command: bash -c "sh /media/docker-entrypoint.sh"
+    volumes:
+    - .:/media/
+
