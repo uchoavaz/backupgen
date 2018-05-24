@@ -5,23 +5,36 @@ echo "listen_addresses = '*'" >> /etc/postgresql/9.6/main/postgresql.conf
 service postgresql restart
 
 cd /var/www
-git clone git@gitlab.com:genomika/backupy.git
-cd backupy
 
-git checkout $backupy_branch
+if [ "prod" = 'true' ]; then
+	git clone git@gitlab.com:genomika/backupy.git
+	cd backupy
 
-cd ..
+	git checkout $backupy_branch
+	cd ..
+fi
+
 cd backupgen
 
 git checkout $backup_genomika_branch
 
 pip3 install -r requirements.txt
 
-if [ "$migrate" = true ] ; then
+if [ "prod" = 'true']; then
+	cp .env_prod .env
+fi
+
+if [ "homolog" = 'true']; then
+	cp .env_homolog .env
+fi
+
+if [ "$migrate" = 'true' ] ; then
         python3 manage.py migrate
 fi
 
-crontab -r
-/var/www/backupgen/crontab.sh
+if [ "prod" = 'true']; then
+	crontab -r
+	/var/www/backupgen/crontab.sh
+fi
 
 cron -f &! python3 manage.py runserver 0.0.0.0:$port
