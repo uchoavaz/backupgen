@@ -21,7 +21,7 @@ git checkout $backup_genomika_branch
 pip3 install -r requirements.txt
 
 if [ "$prod" = 'true']; then
-	ls
+	echo "entrei na copia do env"
 	cat .env_prod
 	cp .env_prod .env
 	cat .env
