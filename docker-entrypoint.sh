@@ -12,32 +12,25 @@ if [ "$prod" = 'true' ]; then
 
 	git checkout $backupy_branch
 	cd ..
-fi
+	cd backupgen
 
-cd backupgen
-
-git checkout $backup_genomika_branch
-
-pip3 install -r requirements.txt
-
-if [ "$prod" = 'true']; then
-	echo "entrei na copia do env"
-	cat .env_prod
+	git checkout $backup_genomika_branch
 	cp .env_prod .env
-	cat .env
+	crontab -r
+	/var/www/backupgen/crontab.sh
 fi
 
 if [ "$homolog" = 'true']; then
+	cd backupgen
+	cp .env_homolog .env
+	git checkout $backup_genomika_branch
 	cp .env_homolog .env
 fi
 
+pip3 install -r requirements.txt
+
 if [ "$migrate" = 'true' ] ; then
         python3 manage.py migrate
-fi
-
-if [ "$prod" = 'true']; then
-	crontab -r
-	/var/www/backupgen/crontab.sh
 fi
 
 cron -f &! python3 manage.py runserver 0.0.0.0:$port
