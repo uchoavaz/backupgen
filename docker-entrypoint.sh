@@ -6,7 +6,7 @@ service postgresql restart
 
 cd /var/www
 
-if [ "prod" = 'true' ]; then
+if [ "$prod" = 'true' ]; then
 	git clone git@gitlab.com:genomika/backupy.git
 	cd backupy
 
@@ -20,11 +20,11 @@ git checkout $backup_genomika_branch
 
 pip3 install -r requirements.txt
 
-if [ "prod" = 'true']; then
+if [ "$prod" = 'true']; then
 	cp .env_prod .env
 fi
 
-if [ "homolog" = 'true']; then
+if [ "$homolog" = 'true']; then
 	cp .env_homolog .env
 fi
 
@@ -32,7 +32,7 @@ if [ "$migrate" = 'true' ] ; then
         python3 manage.py migrate
 fi
 
-if [ "prod" = 'true']; then
+if [ "$prod" = 'true']; then
 	crontab -r
 	/var/www/backupgen/crontab.sh
 fi
