@@ -20,9 +20,8 @@ if [ "$prod" = 'true' ]; then
 	/var/www/backupgen/crontab.sh
 fi
 
-if [ "$homolog" = 'true']; then
+if [ "$homolog" = 'true' ]; then
 	cd backupgen
-	cp .env_homolog .env
 	git checkout $backup_genomika_branch
 	cp .env_homolog .env
 fi
