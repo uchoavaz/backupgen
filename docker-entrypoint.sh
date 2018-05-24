@@ -21,7 +21,10 @@ git checkout $backup_genomika_branch
 pip3 install -r requirements.txt
 
 if [ "$prod" = 'true']; then
+	ls
+	cat .env_prod
 	cp .env_prod .env
+	cat .env
 fi
 
 if [ "$homolog" = 'true']; then
