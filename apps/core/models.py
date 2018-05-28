@@ -25,7 +25,7 @@ class Backup(models.Model):
     name = models.CharField('Nome do backup', max_length=50)
     percents_completed = models.FloatField('Percentual Completo', default=0)
     start_backup_datetime = models.DateTimeField(
-        'Hora de início do backup', null=True, default=timezone.now())
+        'Hora de início do backup', default=timezone.now())
     finish_backup_datetime = models.DateTimeField(
         'Hora de fim do backuo', null=True, blank=True)
     databases_passed = models.TextField('Bancos passados', null=True, blank=True)
