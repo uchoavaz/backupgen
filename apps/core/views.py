@@ -35,7 +35,7 @@ class SystemInfoView(LoginRequiredMixin, ListView):
         return context
 
 
-class HomeView(SystemInfoView, ListView):
+class HomeView(ListView):
     template_name = "home.html"
     model = Backup
 
@@ -48,6 +48,19 @@ class HomeView(SystemInfoView, ListView):
         context = super(HomeView, self).get_context_data(**kwargs)
         link_home = reverse('core:home')
         context['links'] = [['Backups disponíveis', link_home]]
+        system_info = SystemInfo.objects.all()
+        context['system_info'] = True
+        context['request'] = self.request
+        try:
+            last_system_info = system_info.last()
+            context['brand'] = last_system_info.brand
+            context['designed_by'] = last_system_info.designed_by
+            context['version'] = last_system_info.version
+        except AssertionError:
+            context['brand'] = ''
+            context['designed_by'] = ''
+            context['version'] = ''
+            context['system_info'] = False
         return context
 
 
